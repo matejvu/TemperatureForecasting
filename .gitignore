@@ -1,0 +1,31 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Open-Meteo request cache (from real_data/fetch_data.py)
+.cache.sqlite
+.cache/
+
+# Generated data / model artifacts
+*.csv
+*.npy
+*.npz
+*.pt
+*.pth
+*.png
+data/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,9 @@
+numpy
+scipy
+torch
+requests
+pandas
+matplotlib
+openmeteo-requests
+requests-cache
+retry-requests
