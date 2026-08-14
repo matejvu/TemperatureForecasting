@@ -23,9 +23,9 @@ PREVIOUS_RUNS_URL = "https://previous-runs-api.open-meteo.com/v1/forecast"
 
 # Station: pick one coordinate pair with dense observation coverage
 # (e.g. a Central European or North American city). Defaults to Berlin.
-STATION_NAME = "berlin"
-STATION_LAT = 52.52
-STATION_LON = 13.41
+STATION_NAME = "petnica"
+STATION_LAT = 44.2469
+STATION_LON = 19.9305
 
 # Variables to fetch (e.g. temperature, pressure, ...).
 HOURLY_VARIABLES = ["temperature_2m", "surface_pressure"]
