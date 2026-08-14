@@ -21,6 +21,7 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 df=pd.read_csv("/home/polaznik/Desktop/nevena/TemperatureForecasting/real_data/berlin_data.csv")
@@ -53,9 +54,7 @@ print(", ova je np", msenp )"""
 
 
 def relativna(temperature_2m, temperature_2m_previous_day1):
-    df = pd.read_csv(
-        "/home/polaznik/Desktop/nevena/TemperatureForecasting/real_data/berlin_data.csv")
-
+ 
     y_true = df[temperature_2m]
     y_pred = df[temperature_2m_previous_day1]
 
@@ -74,3 +73,34 @@ mre = relativna(
     "temperature_2m_previous_day1")
 
 print("relativna", mre)
+
+
+
+#greske u odnosu na srednju vrednost
+
+average = df["temperature_2m"].mean()
+print(average)
+
+
+#GRAFICI ZA SREDNJE VREDNOSTI GRESKE
+
+relativna1d= relativna("temperature_2m","temperature_2m_previous_day1")
+relativna3d= relativna("temperature_2m","temperature_2m_previous_day3")
+relativna5d= relativna("temperature_2m","temperature_2m_previous_day5")
+relativna7d= relativna("temperature_2m","temperature_2m_previous_day7")
+
+print("dan1 relativna",relativna1d)
+
+greske = [relativna1d, relativna3d, relativna5d, relativna7d]
+nazivi = ["1 dan", "3 dana", "5 dana", "7 dana"]
+
+plt.figure(figsize=(8, 5))
+
+plt.bar(nazivi, greske, color=["blue", "orange", "green", "yellow"])
+
+plt.xlabel("broj dana")
+plt.ylabel("relativna greska")
+plt.title("srednja relativna greska")
+
+plt.grid(axis="y", alpha=0.3)
+plt.show()

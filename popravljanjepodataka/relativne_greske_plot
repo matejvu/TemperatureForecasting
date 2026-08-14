@@ -1,0 +1,52 @@
+import pandas as pd
+from sklearn.metrics import mean_squared_error
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+df=pd.read_csv("/home/polaznik/Desktop/nevena/TemperatureForecasting/real_data/berlin_data.csv")
+print(df.head())
+
+df = df.iloc[600:]
+
+df = df.reset_index(drop=True)
+
+
+
+def relativna(temperature_2m, temperature_2m_previous_day1):
+ 
+    y_true = df[temperature_2m]
+    y_pred = df[temperature_2m_previous_day1]
+
+    y_true_masked = y_true.replace(0, np.nan)
+
+    relative_errors = np.abs(
+        (y_true_masked - y_pred) / y_true_masked)
+
+    return relative_errors
+
+
+df["date"] = pd.to_datetime(df["date"])
+
+
+greska1d= relativna("temperature_2m", "temperature_2m_previous_day1")
+greska3d= relativna("temperature_2m", "temperature_2m_previous_day3")
+greska5d= relativna("temperature_2m", "temperature_2m_previous_day5")
+greska7d= relativna("temperature_2m", "temperature_2m_previous_day7")
+
+plt.figure(figsize=(12, 6))
+
+plt.plot(df["date"], greska1d, label="1 dan")
+plt.plot(df["date"], greska3d, label="3 dana")
+plt.plot(df["date"], greska5d, label="5 dana", color="blue")
+
+plt.xlabel("vreme")
+plt.ylabel("relativna greska")
+plt.title("Relativna greška predikcija temperature")
+plt.legend()
+plt.grid(True)
+
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
