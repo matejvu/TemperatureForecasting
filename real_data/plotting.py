@@ -6,7 +6,7 @@ import pandas as pd
 # Must match STATION_NAME in fetch_data.py — kept as a plain constant here
 # (instead of importing it from fetch_data) so this script doesn't need
 # the openmeteo_requests/requests_cache/retry_requests dependencies.
-STATION_NAME = "berlin"
+STATION_NAME = "petnica"
 
 
 def load_station_csv(path: str) -> pd.DataFrame:
