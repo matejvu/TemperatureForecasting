@@ -1,0 +1,47 @@
+
+
+import pandas as pd
+from sklearn.metrics import mean_squared_error
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+df=pd.read_csv("/home/polaznik/Desktop/nevena/TemperatureForecasting/real_data/berlin_data.csv")
+print(df.head())
+
+df = df.iloc[600:]
+
+df = df.reset_index(drop=True)
+
+def kvadratna(temperature_2m, temperature_2m_previous_day1):
+    
+    y_true = df[temperature_2m]
+    y_pred = df[temperature_2m_previous_day1]
+
+    squared_errors = (y_true - y_pred) ** 2
+
+    return squared_errors
+
+kgreska1d= kvadratna("temperature_2m", "temperature_2m_previous_day1")
+kgreska3d= kvadratna("temperature_2m", "temperature_2m_previous_day3")
+kgreska5d= kvadratna("temperature_2m", "temperature_2m_previous_day5")
+kgreska7d= kvadratna("temperature_2m", "temperature_2m_previous_day7")
+
+
+plt.figure(figsize=(12, 6))
+
+plt.plot(df["date"], kgreska1d, label="1 dan")
+plt.plot(df["date"], kgreska3d, label="3 dana")
+plt.plot(df["date"], kgreska5d, label="5 dana")
+plt.plot(df["date"], kgreska7d, label="7 dana", color="blue")
+
+plt.xlabel("vreme")
+plt.ylabel("kvadratna greska")
+plt.title("kvadratna greška predikcija temperature")
+plt.legend()
+plt.grid(True)
+
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
