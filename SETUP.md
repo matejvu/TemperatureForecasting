@@ -86,6 +86,23 @@ If you get `ModuleNotFoundError`, double check the virtual environment is
 active (step 3) and that `pip install -r requirements.txt` completed
 without errors.
 
+## 6. Running notebooks in VS Code
+
+To open and run the `.ipynb` notebooks (e.g.
+`notebooks/feature_exploration.ipynb`) in VS Code, install two
+extensions from the Extensions panel (`Ctrl+Shift+X`):
+
+- **Python** (`ms-python.python`)
+- **Jupyter** (`ms-toolsai.jupyter`)
+
+Then open the notebook file. In the top-right corner, click **Select
+Kernel** and choose the `.venv` environment from step 3 — it should show
+up as something like `.venv (Python 3.x.x)`. `ipykernel`, needed for
+VS Code to run notebooks against that environment, is already included
+in `requirements.txt`.
+
+Once the kernel is selected, run cells with `Shift+Enter`, top to bottom.
+
 ---
 
 # Git Workflow
