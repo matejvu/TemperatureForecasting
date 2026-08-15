@@ -27,7 +27,7 @@ mse = mean_squared_error(y_true, y_pred)
 
 print("srednja kvadratna greska", mse)
 
-"""
+
 
 
 
@@ -49,7 +49,7 @@ def relativna(temperature_2m, temperature_2m_previous_day1):
 
 
 df["date"] = pd.to_datetime(df["date"])
-
+"""
 
 greska1d= relativna("temperature_2m", "temperature_2m_previous_day1")
 greska3d= relativna("temperature_2m", "temperature_2m_previous_day3")
@@ -100,7 +100,7 @@ plt.title("srednja relativna greska")
 plt.grid(axis="y", alpha=0.3)
 plt.show()
 
-"""
+
 #KVADRATNA
 
 #vreme vs greska
@@ -142,7 +142,7 @@ plt.show()
 
 #srednje kvadratne grseske
 
-"""
+
 def srednjakvadratna(temperature_2m, temperature_2m_previous_day1):
    
     y_true = df[temperature_2m]
@@ -172,13 +172,16 @@ plt.title("srednja kvadratna greska")
 
 plt.grid(axis="y", alpha=0.3)
 plt.show()
-"""
+
+
+#predicted vs real temp
 
 
 temp = df['temperature_2m']
 prognoza1d = df['temperature_2m_previous_day1']
 prognoza7d = df['temperature_2m_previous_day7']
 
+#funkcija za plot
 
 def plot(y1,y2,y3):
     plt.figure(figsize=(12, 6))
@@ -200,3 +203,45 @@ def plot(y1,y2,y3):
     plt.show()
 
 plot(temp,prognoza1d,prognoza7d)
+
+"""
+
+
+#vraca vrednosti relativne greske vece od 50
+
+
+
+
+
+df["date"] = pd.to_datetime(df["date"])
+
+
+greska1d= relativna("temperature_2m", "temperature_2m_previous_day1")
+greska3d= relativna("temperature_2m", "temperature_2m_previous_day3")
+greska5d= relativna("temperature_2m", "temperature_2m_previous_day5")
+greska7d= relativna("temperature_2m", "temperature_2m_previous_day7")
+
+
+n=len(greska5d)
+for i in range(n):
+    if greska5d.iloc[i]>50:
+        print(print(df['temperature_2m'].iloc[i], df['temperature_2m_previous_day5'].iloc[i])
+)
+
+plt.figure(figsize=(12, 6))
+
+plt.plot(df["date"], greska1d, label="1 dan")
+plt.plot(df["date"], greska3d, label="3 dana")
+plt.plot(df["date"], greska5d, label="5 dana")
+
+
+plt.xlabel("vreme")
+plt.ylabel("relativna greska")
+plt.title("Relativna greška predikcija temperature")
+plt.legend()
+plt.grid(True)
+
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
