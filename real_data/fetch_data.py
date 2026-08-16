@@ -11,12 +11,14 @@ Two datasets are fetched and joined:
   compared against.
 """
 
+import time
 from datetime import date, timedelta
 
 import numpy as np
 import openmeteo_requests
 import pandas as pd
 import requests_cache
+from openmeteo_requests.Client import OpenMeteoRequestsError
 from retry_requests import retry
 
 HISTORICAL_FORECAST_URL = "https://historical-forecast-api.open-meteo.com/v1/forecast"
@@ -85,6 +87,34 @@ _retry_session = retry(_cache_session, retries=5, backoff_factor=0.2)
 _openmeteo = openmeteo_requests.Client(session=_retry_session)
 
 
+def _weather_api_with_retry(url: str, params: dict, retries: int = 3, wait_seconds: int = 60):
+    """Call openmeteo.weather_api, retrying if Open-Meteo's rate limit is hit.
+
+    Open-Meteo returns its per-minute rate limit as an error field on an
+    otherwise normal response, not as a retryable HTTP status, so the
+    retry_requests session wrapped around the client's connection never
+    sees it. This adds a manual retry loop for that specific case.
+
+    Args:
+        url: the Open-Meteo API endpoint to call.
+        params: request parameters dict.
+        retries: number of extra attempts after the first failure.
+        wait_seconds: seconds to wait before each retry.
+
+    Returns:
+        The list of responses from openmeteo.weather_api().
+    """
+    for attempt in range(retries + 1):
+        try:
+            return _openmeteo.weather_api(url, params=params)
+        except OpenMeteoRequestsError as e:
+            is_rate_limit = "limit exceeded" in str(e).lower()
+            if attempt == retries or not is_rate_limit:
+                raise
+            print(f"Open-Meteo rate limit hit, waiting {wait_seconds}s before retrying...")
+            time.sleep(wait_seconds)
+
+
 def _hourly_response_to_dataframe(response, column_names: list) -> pd.DataFrame:
     """Turn an openmeteo_requests hourly response into a timestamp-indexed DataFrame.
 
@@ -141,7 +171,7 @@ def fetch_historical_forecast(
         "start_date": start_date,
         "end_date": end_date,
     }
-    responses = _openmeteo.weather_api(HISTORICAL_FORECAST_URL, params=params)
+    responses = _weather_api_with_retry(HISTORICAL_FORECAST_URL, params)
     return _hourly_response_to_dataframe(responses[0], variables)
 
 
@@ -187,7 +217,7 @@ def fetch_previous_runs(
         "end_date": end_date,
         "hourly": hourly_params,
     }
-    responses = _openmeteo.weather_api(PREVIOUS_RUNS_URL, params=params)
+    responses = _weather_api_with_retry(PREVIOUS_RUNS_URL, params)
     return _hourly_response_to_dataframe(responses[0], hourly_params)
 
 
@@ -255,6 +285,11 @@ if __name__ == "__main__":
     end_date = (date.today() - timedelta(days=2)).isoformat()
 
     features = fetch_historical_forecast(STATION_LAT, STATION_LON, START_DATE, end_date)
+
+    # Give Open-Meteo's per-minute rate limit a moment to reset before the
+    # second large request (the first one above already used several).
+    time.sleep(5)
+
     previous_runs = fetch_previous_runs(
         STATION_LAT, STATION_LON, BASELINE_START_DATE, end_date
     )
