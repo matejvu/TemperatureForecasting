@@ -85,31 +85,33 @@ X_test, y_test = create_dataset(test, lookback=lookback)
 print(X_train.shape, y_train.shape)
 print(X_test.shape, y_test.shape)
 
-
 class TemperatureFFN(nn.Module):
-    def __init__(self, input_size):
+    def __init__(self, input_size, hidden_size=64, num_layers=1, dropout=0.0):
         super().__init__()
-        self.network = nn.Sequential(
-            nn.Linear(input_size, 128),
-            nn.ReLU(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, 1)
-        )
-        
-    def forward(self, x):
-        # x dolazi kao [batch_size, lookback, 1] -> menjamo u [batch_size, lookback]
-        # Ako je lookback=1, ovo postaje [batch_size, 1] što nn.Linear savršeno razume
-        if x.dim() == 3:
-            x = x.squeeze(-1) 
-        return self.network(x)
 
+        layers = []
+        in_features = input_size
+
+        for i in range(num_layers):
+            layers.append(nn.Linear(in_features, hidden_size))
+            layers.append(nn.ReLU())
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
+            in_features = hidden_size
+
+        layers.append(nn.Linear(in_features, 1))
+
+        self.network = nn.Sequential(*layers)
+
+    def forward(self, x):
+        # x comes as [batch_size, lookback, 1] -> reshape to [batch_size, lookback]
+        if x.dim() == 3:
+            x = x.squeeze(-1)
+        return self.network(x)
 # 1. ISPRAVKA: input_size je jednak lookback-u (broj prethodnih koraka koje gledamo)
 input_size = lookback 
 
-model = TemperatureFFN(input_size)
+model = TemperatureFFN(input_size=lookback, hidden_size=64, num_layers=1)
 print("neuralna mreza: ", model)
 
 import torch.optim as optim
@@ -121,7 +123,7 @@ loss_fn = nn.MSELoss()
 # Pravljenje loader-a
 loader = data.DataLoader(data.TensorDataset(X_train, y_train), shuffle=True, batch_size=8)
 
-n_epochs = 50
+n_epochs = 10
 for epoch in range(n_epochs):
     model.train()
     for X_batch, y_batch in loader:
@@ -166,7 +168,7 @@ for epoch in range(n_epochs):
         print("Epoch %d: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
 """
 
-torch.save(model.state_dict(), "fnn.pt")
+torch.save(model.state_dict(), "fnn_hs64_nl1_lr0001.pt")
 model.eval()
 with torch.no_grad():
     # Izvlačenje predikcija za trening i test
